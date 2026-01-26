@@ -1,0 +1,9 @@
+[submodule "src/externals/luau-raylib"]
+	path = src/externals/luau-raylib
+	url = https://github.com/fenrave/luau-raylib
+[submodule "src/externals/zune-filesystem-resolver"]
+	path = src/externals/zune-filesystem-resolver
+	url = https://github.com/fenrave/zune-filesystem-resolver
+[submodule "src/externals/Quail-Luau"]
+	path = src/externals/Quail-Luau
+	url = https://github.com/fenrave/Quail-Luau

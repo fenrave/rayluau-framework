@@ -1,0 +1,17 @@
+{
+    "languageMode": "strict",
+    "lint": {"LocalUnused": false, "ImportUnused": false, "SameLineStatement": true, "BuiltinGlobalWrite": false},
+    "aliases": {
+        "Component": "./src/internals/component_System/m_Comp",
+        "raylib": "./src/externals/luau-raylib/src/init",
+        "Rect": "./src/internals/libraries/modules/base_Modules/rect",
+        "Case": "./src/externals/Quail-Luau/src/extModules/case",
+        "Render": "./src/internals/libraries/modules/lib_Modules/render",
+        "Camera": "./src/internals/libraries/modules/base_Modules/cam",
+        "Pool": "./src/internals/libraries/modules/base_Modules/pool",
+        "Quail": "./src/externals/Quail-Luau/src/Quail",
+        "Types.Quail": "./src/externals/Quail-Luau/src/Types.Quail",
+        "System": "./src/internals/libraries/System",
+        "Collisions": "./src/internals/libraries/modules/lib_Modules/collisions"
+    }
+}
