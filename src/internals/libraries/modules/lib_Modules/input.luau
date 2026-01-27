@@ -1,22 +1,41 @@
 ---------------------------------------
 local Raylib = require("@raylib")
+local task = zune.task
 ---------------------------------------
 local lib = Raylib.lib
+local Down = lib.IsKeyDown
+local Up = lib.IsKeyUp
 ---------------------------------------
-export type InputHandle<Callback = (DT: number) -> ()> = {
-	Toggle: (boolean?) -> (),
+type Default = (DT: number) -> ()
 
-	InputCallback: Callback
+export type InputHandle<Down = Default, Up = Default> = {
+	read Toggle: (self: InputHandle, NewState: boolean?) -> (),
+	State: boolean,
+
+	read OnDown: (self: InputHandle, fn: Down) -> (),
+	read OnUp: (self: InputHandle, fn: Up) -> (),
+
+	write KeyDown: Down?,
+	write KeyUp: Up?
+}
+
+type RegistryHandle<Down = Default, Up = Default> = {
+	KeyDown: Down,
+	KeyUp: Up
 }
 
 type InputRegistry<KeyList = { [string]: number }, MouseList = { Button: { any }, Cursor: { any } }> = {
 	read Keyboard: KeyList,
 	read Mouse: MouseList,
 	Registries: {
-		[string]: (DT: number) -> (),
+		[number]: {
+			[number]: InputHandle
+		}
 	},
 
-	RegisterInput: <Type>(Key: string, fn: Type) -> InputHandle<Type>
+	read RegisterChecker: thread,
+
+	read RegisterKey: (self: InputRegistry, Key: string) -> InputHandle
 }
 ---------------------------------------
 local Keys = {
@@ -78,7 +97,7 @@ local Keys = {
 
 	VOLUME_DOWN = 25,
 }
-
+---------------------------------------
 local Mouse = {
 	Button = {
 		LEFT = 0,		SIDE = 3,
@@ -98,6 +117,25 @@ local Mouse = {
 		RESIZE_NESW = 8,
 	}
 }
+---------------------------------------
+local Handle: InputHandle = {
+	State = true,
+	OnDown = function(self: InputHandle,fn: Default)
+		self.KeyDown = fn
+	end,
+
+	OnUp = function(self: InputHandle, fn: Default)
+		self.KeyUp = fn
+	end,
+
+	Toggle = function(self: InputHandle, NewState: boolean?)
+		self.State = if NewState then NewState else not self.State
+	end
+}
+
+---------------------------------------
+local Registries: {RegistryHandle} = {}
+
 local InputRegistry: InputRegistry<typeof(Keys), typeof(Mouse)> = {
 	Keyboard = Keys,
 	Mouse = {
@@ -105,5 +143,47 @@ local InputRegistry: InputRegistry<typeof(Keys), typeof(Mouse)> = {
 		Cursor = Mouse.Cursor,
 	},
 
-	Registries = {},
+	RegisterChecker = (function()
+
+		local Thread = coroutine.create(function()
+			local DT: number = 0
+			while true do DT = task.wait(1/90)
+				for Key, Handle in Registries do
+					local DCheck = Down(Key)
+					local UCheck = Up(Key)
+					if DCheck == 1 then
+						Handle.KeyDown(DT)
+					end
+
+					if UCheck == 1 then
+						Handle.KeyUp(DT)
+					end
+				end	
+			end
+		end); coroutine.resume(Thread)
+
+		return Thread
+	end)(),
+
+	Registries = Registries :: any,
+
+	RegisterKey = function(self: InputRegistry, Key: string): InputHandle
+		local ValidKey = self.Keyboard[Key] 
+
+		if not ValidKey then
+			error(`Invalid Key, {Key} not found in key list. \n Add new keys if necessary or correct this if it's an error.`)
+		end
+
+		local NewHandle = table.clone(Handle)
+
+		local Registry = self.Registries[ValidKey]
+
+		if not Registry then
+			self.Registries[ValidKey] = {}
+		end
+
+		table.insert(Registry, NewHandle)
+
+		return NewHandle
+	end
 }
