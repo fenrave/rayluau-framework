@@ -10,13 +10,17 @@ local Render = require("@Render")
 local Camera = require("@Camera")
 local Quail = require("@Quail")
 local Collisions = require("@Collisions")
+local Input = require("@Input")
+local Texture = require("@Texture")
 
 local System = {
     Rect = Rect,
     Camera = Camera,
+    Texture = Texture,
 
     Render = Render,
     Collisions = Collisions,
+    Input = Input,
 
     --Raylib
     rLib = rLib,

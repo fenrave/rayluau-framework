@@ -35,7 +35,7 @@ type InputRegistry<KeyList = { [string]: number }, MouseList = { Button: { any }
 
 	read RegisterChecker: thread,
 
-	read RegisterKey: (self: InputRegistry, Key: string) -> InputHandle
+	read RegisterKey: (self: InputRegistry, Key: keyof<KeyList>) -> InputHandle
 }
 ---------------------------------------
 local Keys = {
@@ -144,7 +144,6 @@ local InputRegistry: InputRegistry<typeof(Keys), typeof(Mouse)> = {
 	},
 
 	RegisterChecker = (function()
-
 		local Thread = coroutine.create(function()
 			local DT: number = 0
 			while true do DT = task.wait(1/90)
@@ -165,7 +164,9 @@ local InputRegistry: InputRegistry<typeof(Keys), typeof(Mouse)> = {
 		return Thread
 	end)(),
 
-	Registries = Registries :: any,
+	Registries = Registries :: {
+		[number]: {InputHandle}
+	},
 
 	RegisterKey = function(self: InputRegistry, Key: string): InputHandle
 		local ValidKey = self.Keyboard[Key] 
@@ -187,3 +188,5 @@ local InputRegistry: InputRegistry<typeof(Keys), typeof(Mouse)> = {
 		return NewHandle
 	end
 }
+
+return InputRegistry
