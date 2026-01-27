@@ -61,12 +61,14 @@ local function UpdatePosition(m1Pos: vector, m1Size: vector, StaticDef: StaticDe
 		buffer.writef32(DynamicObj, 4, m1Pos.y + (mDis.y * math.sign(diff.y))) ; return
 	end
 end
-
+---------------------------------------
 local function CollisionHandler(OptBuffer: buffer?)
 	local self = coroutine.running() ; CurrentHandler = self
+
 	local Storage = {
 		InternalStorage = {OptBuffer} :: {buffer}
 	}; ThreadStorage[self] = Storage
+	
 	local DynamicCache = {}
 
 	local Updater = task.spawn(function()
@@ -94,7 +96,6 @@ local function CollisionHandler(OptBuffer: buffer?)
 				end
 
 				for _, StaticDef in Group do
-
 					if Check(Obj, StaticDef.Object) == 0 then
 						continue
 					end
@@ -106,7 +107,7 @@ local function CollisionHandler(OptBuffer: buffer?)
 		coroutine.resume(Updater)
 	end
 end
-
+---------------------------------------
 local DefInit: ThreadDef = {
 	Counter = 0,
 	MainThread = task.spawn(CollisionHandler, nil),

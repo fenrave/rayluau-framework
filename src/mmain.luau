@@ -112,9 +112,7 @@ local function Main(Args: {string}): ()
 
 	Render:AddToQueue("PreRender", "Test", function()
 		TestRect:Iterate(function(Object, Index: number)
-			zune.io.stderr:lock("none")
 			Object.Position = vector.lerp(Object.Position, pos, .003)
-			zune.io.stderr:unlock()
 		end)
 	end)
 
@@ -124,10 +122,7 @@ local function Main(Args: {string}): ()
 		end)
 		
 		TestRect:Iterate(function(Object, Index: number)
-			zune.io.stderr:lock("none")
-
 			Lib.DrawRectangleRec(Object.Object, Const.BEIGE)
-			zune.io.stderr:unlock()
 		end)
 	end)
 

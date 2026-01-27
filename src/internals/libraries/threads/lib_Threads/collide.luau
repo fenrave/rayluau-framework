@@ -33,13 +33,9 @@ local function UpdatePosition(m1Pos: vector, m1Size: vector, StaticDef: StaticDe
 	local mDis: vector = (m1Size + m2Size) - vector.abs(diff)
 
 	if mDis.x < mDis.y then
-		zune.io.stderr:lock("none")
 		DynamicObj:writef32(0, m1Pos.x + (mDis.x * math.sign(diff.x)))
-		zune.io.stderr:unlock()
 	else
-		zune.io.stderr:lock("none")
 		DynamicObj:writef32(4, m1Pos.y + (mDis.y * math.sign(diff.y)))
-		zune.io.stderr:unlock()
 	end
 end
 
@@ -68,18 +64,16 @@ local function CollisionHandler(List: {buffer}, Field: q.ThreadInterface)
 				if not DynamicCache[DynamicObj] then
 					DynamicCache[DynamicObj] = {} :: any
 				end
-				zune.io.stderr:lock("none")
+
 				local Pos: vector = vector.create(
 					DynamicObj:readf32(0),
 					DynamicObj:readf32(4)
 				)
-				zune.io.stderr:unlock()
-				zune.io.stderr:lock("none")
+
 				local Size = vector.create(
 					DynamicObj:readf32(8),
 					DynamicObj:readf32(12)
 				)/2
-				zune.io.stderr:unlock()
 				DynamicCache[DynamicObj] = {
 					Pos = Pos,
 					Size = Size,

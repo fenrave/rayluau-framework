@@ -45,8 +45,6 @@ export type Pool<Type = any> = {
 	InternalList: {buffer}
 }
 ---------------------------------------
-export type ExportList<Type> = TaggedList | Type
----------------------------------------
 local function Iterator(self: Pool, fn: (...any) -> ()): ()
 	for i: number = 1, self.Amount do
 		fn(self.ObjectList[i], i)

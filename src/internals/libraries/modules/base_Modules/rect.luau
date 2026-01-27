@@ -1,7 +1,8 @@
+---------------------------------------
 local Pool = require("@Pool")
 local Raylib = require("@raylib")
 local Rectangle = Raylib.structs.Rectangle
-
+---------------------------------------
 type InternalRectangle = setmetatable<{
 	read Name: string | number,
 
@@ -16,7 +17,7 @@ type InternalRectangle = setmetatable<{
 }, {}>
 
 export type Rect = InternalRectangle
-
+---------------------------------------
 local ReadList = {
 	Position = function(List: InternalRectangle): vector
 		return vector.create(
@@ -43,7 +44,7 @@ local WriteList = {
 		buffer.writef32(List.Object, 12, Value.y)
 	end
 }
-
+---------------------------------------
 local Meta = {
 	__index = function(List: InternalRectangle, Index: string)
 		return ReadList[Index](List)
@@ -52,8 +53,7 @@ local Meta = {
 		WriteList[Index](List, Value)
 	end
 }
-
-
+---------------------------------------
 local function NewRect(Name, position: vector, size: vector): Rect
 	local InternalStruct: Raylib.Rectangle = Rectangle:new({
 		x = position.x,

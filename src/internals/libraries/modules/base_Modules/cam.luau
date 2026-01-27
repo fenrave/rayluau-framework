@@ -1,6 +1,7 @@
+---------------------------------------
 local Raylib = require("@raylib")
 local Camera = Raylib.structs.Camera2D
-
+---------------------------------------
 type InternalCamera = setmetatable<{
 	read Name: string | number,
 	Offset: vector,
@@ -21,53 +22,58 @@ export type Camera = InternalCamera & {
 	read Last_Rotation: number,
 	read Last_Zoom: number,
 }
-
+---------------------------------------
 local ReadList = {
-	offset = function(List: InternalCamera): vector
+
+	Offset = function(List: InternalCamera): vector
 		return vector.create(
 			buffer.readf32(List.Object, 0),
 			buffer.readf32(List.Object, 4)
 		)
 	end,
-	target = function(List: InternalCamera): vector
+
+	Target = function(List: InternalCamera): vector
 		return vector.create(
 			buffer.readf32(List.Object, 8),
 			buffer.readf32(List.Object, 12)
 		)
 	end,
-	rotation = function(List: InternalCamera): number
+
+	Rotation = function(List: InternalCamera): number
 		return buffer.readf32(List.Object, 16)
 	end,
-	zoom = function(List: InternalCamera): number
+
+	Zoom = function(List: InternalCamera): number
 		return buffer.readf32(List.Object, 20)
 	end,
 }
-
+---------------------------------------
 local WriteList = {
 
 	Offset = function(List: InternalCamera, Value: vector): ()
+		List.Last_Offset = ReadList.Offset(List)
 		buffer.writef32(List.Object, 0, Value.x)
 		buffer.writef32(List.Object, 4, Value.y)
-		List.Last_Offset = Value
+		
 	end,
 
 	Target = function(List: InternalCamera, Value: vector): ()
+		List.Last_Target = ReadList.Target(List)
 		buffer.writef32(List.Object, 8, Value.x)
 		buffer.writef32(List.Object, 12, Value.y)
-		List.Last_Target = Value
 	end,
 
 	Rotation = function(List: InternalCamera, Value: number): ()
+		List.Last_Rotation = ReadList.Rotation(List)
 		buffer.writef32(List.Object, 16, Value)
-		List.Last_Rotation = Value
 	end,
 
 	Zoom = function(List: InternalCamera, Value: number): ()
+		List.Last_Zoom = ReadList.Zoom(List)
 		buffer.writef32(List.Object, 20, Value)
-		List.Last_Zoom = Value
 	end
 }
-
+---------------------------------------
 local Meta = {
 	__index = function(List, Index: string)
 		return ReadList[Index](List)
@@ -76,7 +82,7 @@ local Meta = {
 		WriteList[Index](List, Value)
 	end
 }
-
+---------------------------------------
 local function NewCamera(Name, offset: vector, target: vector, rotation: number, zoom: number): Camera
 	local InternalStruct: Raylib.Camera2D = Camera:new({
 		offset = offset,

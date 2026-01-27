@@ -1,22 +1,18 @@
+---------------------------------------
 local System = require("@System")
-
 local Render = System.Render
 local Camera = System.Camera
-
 local Rect = System.Rect
---------------------------------
 local Quail = System.Utils.Quail
-
+---------------------------------------
 local Const = System.rConsts
 local Lib = System.rLib
 local Structs = System.rStructs
+---------------------------------------
 local rand = zune.random.new()
 local Args = zune.process.args
 local ffi = zune.ffi
-local buf = ffi.struct({
-	{len = ffi.types.double}
-})
-
+---------------------------------------
 local API = ffi.c.compile([[
 	void* main(void* buffer) {
 		return buffer;
@@ -27,7 +23,7 @@ local CastPtr = ffi.fn(
 	{returns = ffi.types.i64, args = {ffi.types.pointer}},
 	API:getSymbol("main") :: FFIPointer
 ) :: (FFIPointer) -> (buffer)
-
+---------------------------------------
 local function Main(Args: {string}): ()
 	local NewCam = Camera("Test", vector.create(0,0), vector.create(0,0), 0, 1)
 	

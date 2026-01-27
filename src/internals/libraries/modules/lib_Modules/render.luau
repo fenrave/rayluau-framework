@@ -1,10 +1,10 @@
----------------------------
+---------------------------------------
 local raylib = require("@raylib")
 local task: _zune_task = zune.task
----------------------------
+---------------------------------------
 local lib = raylib.lib
 local const = raylib.const
----------------------------
+---------------------------------------
 export type ThreadDef = {
 	read MainThread: thread, 
 	Counter: number, 
@@ -18,6 +18,7 @@ type Render = {
 		[string]: {[string]: () -> ()}
 	},
 	Counter: number,
+	CanRender: boolean,
 
 	SetCamera: (self: Render, Camera: raylib.Camera2D) -> (),
 	GetCurrentCamera: (self: Render) -> raylib.Camera2D,
@@ -32,14 +33,14 @@ type Render = {
 
 	StartRender: (self: Render) -> number
 }
----------------------------
-
+---------------------------------------
 local Render = {
 	FunctionQueue = {
 		Render = {},
 		PreRender = {}
 	},
-	Counter = 0
+	Counter = 0,
+	CanRender = true
 } :: Render
 
 
@@ -74,14 +75,27 @@ function Render:RemoveThread(Name): ()
 end
 
 Render.ThreadQueue = {}
-
---[==============================[+
-
-+]==============================]--
+---------------------------------------
 local Timer: number = os.clock()
+
+local ThreadUpdater: thread = task.spawn(function()
+	while true do coroutine.yield()
+		for Name, ThreadTable in Render.ThreadQueue do
+			ThreadTable.Counter += 1
+			if (ThreadTable.Counter) > ThreadTable.UpdateDelay then
+				coroutine.resume(ThreadTable.MainThread)
+				ThreadTable.Counter = 0
+			end
+		end
+		
+		if lib.WindowShouldClose() == 1 then
+			Render.CanRender = false
+		end
+	end
+end)
+---------------------------------------
 function Render:StartRender(): number
-	while lib.WindowShouldClose() == 0 do
-		self.Counter += 1
+	while self.CanRender do self.Counter += 1
 
 		for Name, func in self.FunctionQueue.PreRender do
 			func()
@@ -100,20 +114,8 @@ function Render:StartRender(): number
 			end; lib.EndMode2D()
 
 		end; lib.EndDrawing()
-		
-		task.wait(.005)
 
-		-- if Timer > 1/60 then
-			for Name, ThreadTable in self.ThreadQueue do
-				ThreadTable.Counter += 1
-				if (ThreadTable.Counter) > ThreadTable.UpdateDelay then
-					task.spawn(ThreadTable.MainThread)
-					ThreadTable.Counter = 0
-				end
-			end
-			Timer = 0
-		-- end; Timer += lib.GetFrameTime()
-
+		task.spawn(ThreadUpdater) ; task.wait(.0001) 
 	end
 	
 	return 0
