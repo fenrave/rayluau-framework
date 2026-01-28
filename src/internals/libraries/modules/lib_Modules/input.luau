@@ -187,9 +187,8 @@ local InputRegistry: InputRegistry<typeof(Keys), typeof(Mouse)> = {
 		local Registry = self.Registries[ValidKey]
 
 		if not Registry then
-			local NewReg = {}
-			self.Registries[ValidKey] = NewReg
-			Registry = NewReg
+			self.Registries[ValidKey] = {}
+			Registry = self.Registries[ValidKey]
 		end
 
 		table.insert(Registry, NewHandle)
