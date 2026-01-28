@@ -24,7 +24,7 @@ type RegistryHandle<Down = Default, Up = Default> = {
 	KeyUp: Up
 }
 
-type InputRegistry<KeyList = { [string]: number }, MouseList = { Button: { any }, Cursor: { any } }> = {
+type InputRegistry<KeyList = {} | {[string]: number}, MouseList = {}> = {
 	read Keyboard: KeyList,
 	read Mouse: MouseList,
 	Registries: {
@@ -134,7 +134,7 @@ local Handle: InputHandle = {
 }
 
 ---------------------------------------
-local Registries: {RegistryHandle} = {}
+local Registries: {{RegistryHandle}} = {}
 
 local InputRegistry: InputRegistry<typeof(Keys), typeof(Mouse)> = {
 	Keyboard = Keys,
@@ -147,15 +147,22 @@ local InputRegistry: InputRegistry<typeof(Keys), typeof(Mouse)> = {
 		local Thread = coroutine.create(function()
 			local DT: number = 0
 			while true do DT = task.wait(1/90)
-				for Key, Handle in Registries do
+				for Key, Handles in Registries do
 					local DCheck = Down(Key)
 					local UCheck = Up(Key)
-					if DCheck == 1 then
-						Handle.KeyDown(DT)
-					end
 
-					if UCheck == 1 then
-						Handle.KeyUp(DT)
+					if DCheck == 0 and UCheck == 0 then
+						continue
+					end
+					
+					for _,Handle in Handles do
+						if DCheck == 1 and Handle.KeyDown then
+							Handle.KeyDown(DT)
+						end
+
+						if UCheck == 1 and Handle.KeyUp then
+							Handle.KeyUp(DT)
+						end
 					end
 				end	
 			end
@@ -180,7 +187,9 @@ local InputRegistry: InputRegistry<typeof(Keys), typeof(Mouse)> = {
 		local Registry = self.Registries[ValidKey]
 
 		if not Registry then
-			self.Registries[ValidKey] = {}
+			local NewReg = {}
+			self.Registries[ValidKey] = NewReg
+			Registry = NewReg
 		end
 
 		table.insert(Registry, NewHandle)

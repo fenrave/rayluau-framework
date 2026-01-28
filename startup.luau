@@ -31,6 +31,7 @@ local include_List = {
 local env_addList: List<string, string> = { --Used these for testing, use as reference
     -- __GLX_VENDOR_LIBRARY_NAME = "mesa",
     -- sam = "true",
+    ZUNE_ASYNC_BACKEND = "epoll",
     MESA_GL_VERSION_OVERRIDE = "4.6",
     -- MESA_LOADER_DRIVER_OVERRIDE = "zink",
     -- GALLIUM_DRIVER = "zink" 
@@ -108,7 +109,7 @@ local function Bundle(): ()
         fs.createFile("./build/main")
     end
 
-    local result = process.run(
+    local result = (process.run :: any)(
         zune_Path, 
         {
             "bundle",
@@ -120,7 +121,7 @@ local function Bundle(): ()
         {shell = true, stdin = "inherit"} :: ProcessOptions
     )
     
-    local runner = process.run(
+    local runner = (process.run :: any)(
         "./build/main",
         {}, 
         {env = env} :: ProcessOptions

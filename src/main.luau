@@ -4,6 +4,7 @@ local Render = System.Render
 local Camera = System.Camera
 local Rect = System.Rect
 local Quail = System.Utils.Quail
+local Input = System.Input
 ---------------------------------------
 local Const = System.rConsts
 local Lib = System.rLib
@@ -66,15 +67,10 @@ local function Main(Args: {string}): ()
 	local hi = RectPool:TagGroup("Hi"):AddTag("h", 1)
 	
 	local TestRect = Rect("Test2", vector.create(400, 300), vector.create(25, 25)):ToPool(100):Populate()
-	
-	local g = zune.ffi.alloc(Structs.Rectangle:size(), Structs.Rectangle:alignment())
-	zune.mem.copy(g, 0, hi.h.Object, Structs.Rectangle:size())
-	
-	local casted = CastPtr(g)
-	print(hi.h.Position.x, g, casted)
 
-	local ptr = ffi.ptrFromAddress(casted)
-	print(ptr)
+	Input:RegisterKey("A"):OnDown(function(DT: number)
+		print(DT)
+	end)
 
 	TestRect:Iterate(function(Object, Index: number)
 		Object.Position += vector.create(rand:nextInteger(-250, 250), rand:nextInteger(-250, 250))
