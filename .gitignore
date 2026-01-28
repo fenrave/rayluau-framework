@@ -2,6 +2,6 @@
 /.kate
 /.zed
 a.out
-build/
 build/raylib.so
 build/main
+test/
