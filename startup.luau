@@ -45,7 +45,7 @@ local env = process.env
 -------------------
 local main = "./src/main.luau"
 
-local output_Dir = "./build/main" ; fs.makeDir(output_Dir, true)
+local output_Dir = "./build/main"
 
 local zune_Path = ""..fs.getExePath()
 

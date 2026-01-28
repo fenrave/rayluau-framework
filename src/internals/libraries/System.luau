@@ -9,7 +9,7 @@ local rConsts = Raylib.const
 local rStructs = Raylib.structs
 ---------------------------------------
 local SysVer = "0.1.0"
-local Header =  `\n> Framework \x1b[33mVersion: {SysVer}\x1b[39m\n`..
+local Header =  `\x1b[39m\n\n> Framework \x1b[33mVersion: {SysVer}\x1b[39m\n`..
 				`> Using Zune \x1b[35mPlatform: {string.upper(zune.platform.os)}\x1b[39m\n\n`
 
 task.delay(.5, out.write, out, Header)
