@@ -26,6 +26,23 @@ local CurrentHandler: thread
 
 local ThreadStorage: ThreadStorage = {}
 -------------------------------------------
+local function CheckCollisions(M1Pos: vector, M1Size: vector, M2Pos: vector, M2Size: vector): boolean
+	if (
+		M1Pos.x < (M2Pos.x + M2Size.x) 
+		and 
+		(M1Pos.x + M1Size.x) > M2Pos.x
+	) and (
+		M1Pos.y < (M2Pos.y + M2Size.y)
+		and
+		(M1Pos.y + M1Size.y) > M2Pos.y
+	) then
+		return true
+	else
+		return false
+	end
+end
+
+
 local function UpdatePosition(m1Pos: vector, m1Size: vector, StaticDef: StaticDef, DynamicObj: FFIPointer)
 	local m2Pos: vector, m2Size: vector = StaticDef.Position, StaticDef.Size
 	local diff: vector = (m1Pos + m1Size) - (m2Pos + m2Size)
@@ -104,7 +121,7 @@ local function CollisionHandler(List: {buffer}, Field: q.ThreadInterface)
 				end
 
 				for _, StaticDef in Group do
-					if Check(DynamicDef.TempBuffer, StaticDef.Object) == 0 then
+					if not CheckCollisions(DynamicDef.Pos, DynamicDef.Size, StaticDef.Position, StaticDef.Size) then
 						continue
 					end
 

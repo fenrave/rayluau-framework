@@ -13,6 +13,11 @@ type StaticDef = {
 	Position: vector,
 	Size: vector
 }
+
+type DynDef = {
+	Pos: vector,
+	Size: vector
+}
 type StaticData = {
 	[vector]: {
 		[number]: StaticDef
@@ -48,17 +53,26 @@ local function GenID(): number
 	return Number
 end
 
-local function UpdatePosition(m1Pos: vector, m1Size: vector, StaticDef: StaticDef, DynamicObj: buffer)	
-	local m2Pos, m2Size = StaticDef.Position, StaticDef.Size
+local function CheckCollisions(M1Pos: vector, M1Size: vector, M2Pos: vector, M2Size: vector): boolean
+	if  (M1Pos.x < (M2Pos.x + M2Size.x) and (M1Pos.x + M1Size.x) > M2Pos.x) and
+		(M1Pos.y < (M2Pos.y + M2Size.y) and (M1Pos.y + M1Size.y) > M2Pos.y) then
+		return true
+	else
+		return false
+	end
+end
 
+local function UpdatePosition(StaticDef: StaticDef, DynDef: DynDef, DynamicObj: buffer)
+	local m2Pos, m2Size = StaticDef.Position, StaticDef.Size
+	local m1Pos, m1Size = DynDef.Pos, DynDef.Size
 	local diff: vector = (m1Pos + m1Size) - (m2Pos + m2Size)
-	
+
 	local mDis: vector = (m1Size + m2Size) - vector.abs(diff)
 
 	if mDis.x < mDis.y then
-		buffer.writef32(DynamicObj, 0, m1Pos.x + (mDis.x * math.sign(diff.x))) ; return
+		buffer.writef32(DynamicObj, 0, (m1Pos.x) + ((mDis.x) * math.sign(diff.x)))
 	else
-		buffer.writef32(DynamicObj, 4, m1Pos.y + (mDis.y * math.sign(diff.y))) ; return
+		buffer.writef32(DynamicObj, 4, (m1Pos.y) + ((mDis.y) * math.sign(diff.y)))
 	end
 end
 ---------------------------------------
@@ -69,7 +83,7 @@ local function CollisionHandler(OptBuffer: buffer?)
 		InternalStorage = {OptBuffer} :: {buffer}
 	}; ThreadStorage[self] = Storage
 	
-	local DynamicCache = {}
+	local DynamicCache: {[buffer]: DynDef} = {}
 
 	local Updater = task.spawn(function()
 		while true do coroutine.yield()
@@ -85,10 +99,11 @@ local function CollisionHandler(OptBuffer: buffer?)
 					)/2
 				}
 			end
+			
 		end
 	end)
 
-	while self do coroutine.yield()
+	while self do coroutine.resume(Updater)
 		for Vector, Group in Static do
 			for Obj, DynamicDef in DynamicCache do
 				if vector.magnitude(Vector - DynamicDef.Pos) > 1000 then
@@ -96,35 +111,24 @@ local function CollisionHandler(OptBuffer: buffer?)
 				end
 
 				for _, StaticDef in Group do
-					if Check(Obj, StaticDef.Object) == 0 then
+					if not CheckCollisions(DynamicDef.Pos, DynamicDef.Size*2, StaticDef.Position, StaticDef.Size*2) then
 						continue
 					end
 
-					UpdatePosition(DynamicDef.Pos, DynamicDef.Size, StaticDef, Obj)
+					UpdatePosition(StaticDef, DynamicDef, Obj)
 				end
 			end
 		end
-		coroutine.resume(Updater)
+		
+		task.wait(1/180)
 	end
-end
+end; task.spawn(CollisionHandler, nil)
 ---------------------------------------
-local DefInit: ThreadDef = {
-	Counter = 0,
-	MainThread = task.spawn(CollisionHandler, nil),
-	UpdateDelay = 0
-}
-
-Render:AddThread(GenID(), DefInit)
 
 local function RegisterRect(Rect: buffer)
 	local CurrentThread = ThreadStorage[CurrentHandler]
 	if #CurrentThread.InternalStorage > PerThreadLimit then
 		CurrentThread = task.spawn(CollisionHandler, Rect)
-		Render:AddThread(GenID(), {
-			Counter = 0,
-			MainThread = CurrentThread,
-			UpdateDelay = 0
-		})
 	else
 		table.insert(CurrentThread.InternalStorage, Rect)
 	end

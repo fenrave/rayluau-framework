@@ -35,8 +35,8 @@ local function Main(Args: {string}): ()
 			325
 		), 
 		vector.create(
-			25,
-			25
+			math.random(10, 20),
+			math.random(10, 20)
 		)
 	):ToPool(200):Populate()
 	local pos = vector.create(425, 325)
@@ -66,14 +66,14 @@ local function Main(Args: {string}): ()
 
 	local hi = RectPool:TagGroup("Hi"):AddTag("h", 1)
 	
-	local TestRect = Rect("Test2", vector.create(400, 300), vector.create(25, 25)):ToPool(100):Populate()
+	local TestRect = Rect("Test2", vector.create(400, 300), vector.create(10, 10)):ToPool(100):Populate()
 
 	Input:RegisterKey("A"):OnDown(function(DT: number)
 		print(DT)
 	end)
 
 	TestRect:Iterate(function(Object, Index: number)
-		Object.Position += vector.create(rand:nextInteger(-250, 250), rand:nextInteger(-250, 250))
+		Object.Position += vector.create(rand:nextInteger(-500, 500), rand:nextInteger(-500, 500))
 		System.Collisions(Object.Object)
 	end)
 	
@@ -87,7 +87,12 @@ local function Main(Args: {string}): ()
 
 	Render:AddToQueue("PreRender", "Test", function()
 		TestRect:Iterate(function(Object, Index: number)
-			Object.Position = vector.lerp(Object.Position, pos, .003)
+			Object.Position = vector.lerp(Object.Position, pos, .005)
+
+			if vector.magnitude(Object.Position - pos) < 50 then
+				Object.Position = pos + vector.create(rand:nextInteger(-600, 600), rand:nextInteger(-600, 600))
+			end
+
 		end)
 	end)
 
