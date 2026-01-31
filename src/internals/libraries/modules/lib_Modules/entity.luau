@@ -43,7 +43,7 @@ local HandlerStore: {[thread]: {
 	Active: {InternalEntity}
 }} = {}
 local PerThreadLimit = 15
-local CurrentThread: thread? = nil
+local CurrentThread: thread = nil :: any
 ---------------------------------------
 local Behaviors: {Read: Read, Write: Write} = {
 	Read = {
@@ -120,10 +120,10 @@ local function NewEntity(Rectangle: Rect.Rect): Entity
 	} :: InternalEntity
 
 	if not CurrentThread then
-		CurrentThread = task.spawn(VelocityHandler)
+		CurrentThread = coroutine.create(VelocityHandler) ; coroutine.resume(CurrentThread)
 	elseif #HandlerStore[CurrentThread].Active > PerThreadLimit then
-		CurrentThread = task.spawn(VelocityHandler)
-	end
+		CurrentThread = coroutine.create(VelocityHandler) ; coroutine.resume(CurrentThread)
+	end; 
 
 	table.insert(HandlerStore[CurrentThread :: thread].Active, NewEntity)
 
