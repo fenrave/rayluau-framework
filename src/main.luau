@@ -5,6 +5,7 @@ local Camera = System.Camera
 local Rect = System.Rect
 local Quail = System.Utils.Quail
 local Input = System.Input
+local Entity = System.Entity
 ---------------------------------------
 local Const = System.rConsts
 local Lib = System.rLib
@@ -28,6 +29,8 @@ local CastPtr = ffi.fn(
 local function Main(Args: {string}): ()
 	local NewCam = Camera("Test", vector.create(0,0), vector.create(0,0), 0, 1)
 	
+	local MainRect = Entity(Rect("Player", vector.zero, vector.create(20, 20)))
+
 	local RectPool = Rect(
 		"Test", 
 		vector.create(
@@ -68,9 +71,22 @@ local function Main(Args: {string}): ()
 	
 	local TestRect = Rect("Test2", vector.create(400, 300), vector.create(10, 10)):ToPool(100):Populate()
 
-	Input:RegisterKey("A"):OnDown(function(DT: number)
-		print(DT)
+	Input:RegisterKey("W"):OnDown(function(DT: number)
+		MainRect.Velocity += vector.create(0,-5)
 	end)
+
+	Input:RegisterKey("A"):OnDown(function(DT: number)
+		MainRect.Velocity += vector.create(-5,0)
+	end)
+
+	Input:RegisterKey("S"):OnDown(function(DT: number)
+		MainRect.Velocity += vector.create(0,5)
+	end)
+
+	Input:RegisterKey("D"):OnDown(function(DT: number)
+		MainRect.Velocity += vector.create(5,0)
+	end)
+
 
 	TestRect:Iterate(function(Object, Index: number)
 		Object.Position += vector.create(rand:nextInteger(-500, 500), rand:nextInteger(-500, 500))
@@ -82,10 +98,14 @@ local function Main(Args: {string}): ()
 	Lib.InitWindow(825, 625, "Test")
 	Lib.SetTargetFPS(120)
 	Render:SetCamera(NewCam.Object)
-
+	NewCam.Offset = pos
 	local positions = {}
 
+	System.Collisions(MainRect.Rectangle.Object)
+
 	Render:AddToQueue("PreRender", "Test", function()
+		NewCam.Offset = vector.create(Lib.GetScreenWidth(), Lib.GetScreenHeight())/2
+		NewCam.Target = MainRect.Position + MainRect.Velocity
 		TestRect:Iterate(function(Object, Index: number)
 			Object.Position = vector.lerp(Object.Position, pos, .005)
 
@@ -97,6 +117,8 @@ local function Main(Args: {string}): ()
 	end)
 
 	Render:AddToQueue("Render", "Test", function()
+		Lib.DrawRectangleRec(MainRect.Rectangle.Object, Const.GREEN)
+		
 		RectPool:Iterate(function(Object: System.Rectangle)
 			Lib.DrawRectangleRec(Object.Object, Const.GOLD)
 		end)

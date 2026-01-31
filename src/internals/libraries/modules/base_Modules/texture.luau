@@ -13,7 +13,7 @@ type InternalTexture = {
 	Format: number
 }
 
-type Texture = setmetatable<InternalTexture | {}, {}>
+export type Texture = setmetatable<InternalTexture | {}, {}>
 ---------------------------------------
 type Loader = (FilePath: buffer & string, Rectangle: buffer?) -> Texture
 ---------------------------------------

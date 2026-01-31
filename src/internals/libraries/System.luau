@@ -21,11 +21,14 @@ local Quail = require("@Quail")
 local Collisions = require("@Collisions")
 local Input = require("@Input")
 local Texture = require("@Texture")
+local Entity = require("@Entity")
 
 local System = {
 	Rect = Rect,
 	Camera = Camera,
 	Texture = Texture,
+
+	Entity = Entity,
 
 	Render = Render,
 	Collisions = Collisions,

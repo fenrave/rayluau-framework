@@ -14,6 +14,7 @@
         "System": "./src/internals/libraries/System",
         "Collisions": "./src/internals/libraries/modules/lib_Modules/collisions",
         "Input": "./src/internals/libraries/modules/lib_Modules/input",
-        "Texture": "./src/internals/libraries/modules/base_Modules/texture"
+        "Texture": "./src/internals/libraries/modules/base_Modules/texture",
+        "Entity": "./src/internals/libraries/modules/lib_Modules/entity"
     }
 }

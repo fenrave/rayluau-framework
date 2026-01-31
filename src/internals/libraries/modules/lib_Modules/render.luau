@@ -17,6 +17,7 @@ type Render = {
 		Render: {[string]: () -> ()},
 		[string]: {[string]: () -> ()}
 	},
+	IsDrawing: boolean,
 	Counter: number,
 	CanRender: boolean,
 
@@ -40,7 +41,8 @@ local Render = {
 		PreRender = {}
 	},
 	Counter = 0,
-	CanRender = true
+	CanRender = true,
+	IsDrawing = false
 } :: Render
 
 
@@ -101,8 +103,9 @@ function Render:StartRender(): number
 			func()
 		end
 
+		self.IsDrawing = true
 		lib.BeginDrawing(); do
-		
+			
 			lib.ClearBackground(const.BLANK)
 
 			lib.BeginMode2D(self.MainCamera); do
@@ -112,9 +115,10 @@ function Render:StartRender(): number
 				end
 
 			end; lib.EndMode2D()
-
+			
 		end; lib.EndDrawing()
-
+		self.IsDrawing = false
+		
 		task.spawn(ThreadUpdater) ; task.wait(.0001) 
 	end
 	
