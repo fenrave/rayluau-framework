@@ -102,7 +102,7 @@ end
 local function VelocityThread()
 	while true do task.wait(1/240)
 		for thread in HandlerStore do
-			coroutine.resume(thread)
+			task.spawn(thread)
 		end
 	end
 end; task.spawn(VelocityThread)
